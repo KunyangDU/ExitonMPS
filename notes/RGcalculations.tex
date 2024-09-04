@@ -1,0 +1,231 @@
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{physics}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{indentfirst}
+\usepackage{amsmath}
+\usepackage{pifont}
+\usepackage{caption}
+\usepackage{float}  %设置图片浮动位置的宏包
+\usepackage{subfigure}  %插入多图时用子图显示的宏包
+\usepackage{verbatim}
+\usepackage{cite}
+\usepackage{abstract}
+\usepackage{amssymb}
+\usepackage{enumitem}
+%\usepackage[numbers]{gbt7714}
+\usepackage{authblk}
+\usepackage[backref]{hyperref}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,
+	filecolor=blue,      
+	urlcolor=blue,
+	citecolor=blue,
+	pdftitle={Overleaf Example},
+}
+\makeatletter
+\renewcommand{\@maketitle}{
+	\newpage
+	%\null
+	\vskip 0em%
+	\begin{center}%
+		{\LARGE \@title \par}%
+		\vskip 1em
+		{\large \@author \par}%
+		%\vskip 1em
+		{\large \@date \par}
+	\end{center}%
+} \makeatother
+\renewcommand*{\Authsep}{，}
+\renewcommand*{\Authand}{，}
+%\renewcommand*{\Authands}{，}
+
+\urlstyle{same}
+\bibliographystyle{plain}
+\setlength{\parindent}{2em}
+\geometry{a4paper,left=3cm,right=2.5cm,top=2.8cm,bottom=2.5cm}
+
+\title{激子的数值重整化群计算}
+\author{Khunyang DU}
+\date{\today}
+
+\begin{document}
+	\maketitle
+	\tableofcontents
+	\section{引言}
+	\subsection{激子的概念}
+	\subsection{超导中的技术}
+	singlet超导配对关联算符（实空间）
+	\begin{equation}
+		\Delta_{ij}=\frac{1}{\sqrt{2}}\left(c^\dagger_{i\uparrow}c^\dagger_{j,\downarrow}-c^\dagger_{i\downarrow}c^\dagger_{j\uparrow}\right)
+	\end{equation}
+	注意到系统电荷的$U(1)$对称性，有
+	\begin{equation}
+		\expval{c^\dagger c^\dagger}{\Psi}=0
+	\end{equation}
+	这是因为在算符$c^\dagger c^\dagger$的作用下，$c^\dagger c^\dagger\ket{\Psi} $的量子数发生变化，因此与$\ket{\Psi}$正交，因此$\expval{\Delta_{ij}}=0$。
+	
+	超导配对关联分布能通过singlet配对算符的二体密度矩阵求得\cite{PhysRevLett.129.177001}
+	\begin{equation}
+		\rho_S(i,j;k,l) = \expval{\Delta_{ij}^\dagger\Delta_{kl}}
+	\end{equation}
+	此矩阵本征值谱的主导阶意味着系统态$\ket{\Psi}$中ODLRO序的存在cite。其对应本征态为超导的可能的配对模式，包含全部的对称性的分类，即
+	\begin{equation}
+		\Delta^n = \sum_{i,j}g^n_{ij}\Delta_{ij}
+	\end{equation}
+	不同的$n$对应系统可能的配对模式，有着不同的对称性。
+	
+	与此对应的，$\vb{k}$空间中的singlet配对算符的二体密度矩阵
+	\begin{equation}
+		\rho_S(\vb{k,\bar{k};k',k\bar{k}'}) = \expval{\Delta_{\vb{k,k'}}^\dagger\Delta_{\vb{\bar{k},\bar{k}'}}}
+	\end{equation}
+	对角化后的本征值谱主导阶对应本征态
+	\begin{equation}
+		\Delta^n = \sum_{\vb{k,k'}}f^n_{\vb{k,k'}}\Delta_{\vb{k,k'}}
+	\end{equation}
+	不同的$n$对应系统可能的配对模式，有着不同的对称性。其中$f^n_{\vb{k,k'}}$称为形状因子，与$g^n_{ij}$唯一对应。
+	\section{MODEL}
+	\subsection{Hamiltonian}
+	\paragraph{Extended Hubbard Model}
+	\begin{equation}
+		\begin{aligned}
+			H =& -t\sum_{\langle i,j \rangle ,\sigma,\alpha}\left(c^\dagger_{i\sigma\alpha}c_{j\sigma\alpha} + \text{H.c.}\right) 
+			- t'\sum_{\langle\langle i,j\rangle\rangle,\sigma,\alpha}\left(c^\dagger_{i\sigma\alpha}c_{j\sigma\alpha} + \text{H.c.}\right)
+			\\ &+U\sum_{i,\alpha}n^d_{i\uparrow\alpha}n^d_{i\downarrow\alpha} 
+			+ V\sum_{\langle i,j \rangle,\sigma,\alpha}n_{i\sigma\alpha}n_{j\sigma\alpha}
+		\end{aligned}
+	\end{equation}
+	\paragraph{$n$-Extended Hubbard Model}
+	\begin{equation}
+		\begin{aligned}
+		H =& -t_n\sum_{\langle i,j \rangle_n,\sigma,\alpha}\left(c^\dagger_{i\sigma\alpha}c_{j\sigma\alpha} + \text{H.c.}\right) 
++V_n\sum_{\langle i,j \rangle_n,\alpha}n_{i\sigma\alpha}n_{j\sigma\alpha}
+		\end{aligned}
+	\end{equation}
+	\subsection{激子配对算符}
+	引入单电子近似，考虑系统对角化的哈密顿量
+	\begin{equation}
+	H = \sum_{\vb{k},n,\sigma}E_n(\vb{k})c^\dagger_{\vb{k}n\sigma}c_{\vb{k}n\sigma}
+	\end{equation}
+	对应导带的产生算符
+	\begin{equation}
+	c^\dagger_{\vb{k}c\sigma}=\sum_{i,\alpha,\sigma}A_{c,i\alpha\sigma}(\vb{k})\mathrm{e}^{i\vb{k}\cdot \vb{R}_i}c^\dagger_{i\alpha\sigma}
+	\end{equation}
+	约定：
+	\begin{itemize}
+		\item $c^\dagger_{i\alpha\sigma} $为点$\vb{R}_i$处自旋为$\sigma$的波函数为$\alpha$轨道的原子轨道波函数的电子产生算符。
+		\item $A_{c,i\alpha\sigma}(\vb{k})$为导带$c$、波矢$\vb{k}$对应的本征态在基$\left\{ c^\dagger_{i\alpha\sigma} \right\}$上的坐标。
+	\end{itemize}
+	可以写出$\vb{k}$空间中的激子配对算符
+	\begin{equation}
+		\begin{gathered}
+		\text{Singlet}\quad \Delta^\dagger_{\vb{k+q,k}S} =
+		\frac{1}{\sqrt{2}}\left(c^\dagger_{\vb{k+q}c\uparrow}c_{\vb{k}v\downarrow}-c^\dagger_{\vb{k+q}c\downarrow}c_{\vb{k}v\uparrow}\right)\\
+		\text{Triplet}\quad \Delta^{\dagger,0}_{\vb{k+q,k}T} = 
+		\frac{1}{\sqrt{2}}\left(c^\dagger_{\vb{k+q}c\uparrow}c_{\vb{k}v\downarrow}+c^\dagger_{\vb{k+q}c\downarrow}c_{\vb{k}v\uparrow}\right)\\
+		\Delta^{\dagger,1}_{\vb{k+q,k}T} = c^\dagger_{\vb{k+q}c\uparrow}c_{\vb{k}v\uparrow},\quad 
+		\Delta^{\dagger,-1}_{\vb{k+q,k}T} = c^\dagger_{\vb{k+q}c\downarrow}c_{\vb{k}v\downarrow}
+		\end{gathered}
+	\end{equation}
+	和超导类比，计算$\expval{\Delta_{ij}^{\dagger}\Delta_{kl}}$，再通过单电子近似过渡到$\vb{k}$空间。
+	
+	多体系统的$\vb{k}$空间？
+	\section{DOWNFOLDING}
+	\subsection{实空间}\label{实空间}
+	计算单粒子等时关联矩阵
+	\begin{equation}
+		M_{\alpha\beta} = \expval{c^\dagger_\alpha c_\beta}
+	\end{equation}
+	对角化后取本征值谱的主导阶
+	\begin{equation}
+		\vb{M}=\sum_{n=1}^N\lambda_n\ket{\psi_n}\bra{\psi_n}\approx \sum_{n=1}^{N_c}\lambda_n\ket{\psi_n}\bra{\psi_n}
+	\end{equation}
+	对应得到$\ket{\psi_n},n\leq N_c$张成子空间的投影算符$P=\sum_{n=1}^{N_c}\ket{\psi_n}\bra{\psi_n}$。
+	\paragraph{物理含义}单粒子等时关联矩阵$\vb{M}$的可以看做态$\left\{c_\alpha\ket{\Psi}\right\}$这组向量的Gram矩阵，其正交相似对角化可以看作Gram矩阵的相合变换（Unitary矩阵的$A^T=A^{-1}$）性质。
+	
+	假设将$\vb{M}$对角化得到本征值$\lambda_n$\footnote{按照降序排列}，本征态$c_n\ket{\Psi}=\sum_\alpha c_\alpha\ket{\Psi}$。因此对角化过程等价于寻找新的一组电子湮灭算符$\left\{c_n\right\}$，满足
+	\begin{equation}
+		\expval{c_m^\dagger c_n}{\Psi}=\delta_{n,m}\expval{\hat{n}_n}
+	\end{equation}
+	即态$\ket{\Psi}$在新的电子湮灭算符$\left\{c_n\right\}$对应的电子能级上满足
+	\begin{enumerate}
+		\item $\lambda_n=\expval{\hat{n}_n}$，占据数逐级递减。
+		\item $\expval{\hat{n}_n}_{n\neq m}=0$，不同能级的电子之间无hopping。
+	\end{enumerate}
+	若满足$\lambda_n\approx 0,n\geq N_c $，则可以在$N_c$处截断，因为以后的能级占据数为0。
+	
+	由于$c_n$在实空间的直观性较差，因此可以对$c_n$进行重新排列组合，比如选取Lattice上的个$N_c$个点，构造此点的Wannier函数。数学表述为
+	\subparagraph{构造Wannier函数}以$\left\{c_\alpha\right\}$为基，$c_n$可表示为向量形式$\vb{c}_n\in \mathcal{R}^{N\times1}$。选择$\{\alpha\}$中的$N_c$个点$\{m\}$，重新构造向量$\vb{C}_m$，满足
+	\begin{enumerate}
+		\item 在第$\{m\}$上取值最大，其它取值尽量能小。
+		\item 不同$\vb{C}_m$正交。
+	\end{enumerate}
+	参考文献\cite{PhysRevB.108.L161111}中展示了完成以上要求的方法，最终能得到转移矩阵$A$，联系着downfolding Wannier函数与原Wannier函数
+	\begin{equation}
+		c_i=\sum_jA_{ij}C_j\quad \Leftrightarrow\quad \begin{pmatrix}
+			c_1\\
+			c_2\\
+			\vdots \\
+			c_N
+		\end{pmatrix}=A\begin{pmatrix}
+		C_1\\
+		C_2\\
+		\vdots \\
+		C_N
+		\end{pmatrix}
+	\end{equation}
+	可以看作是不同能带对应的电子湮灭算符将原Wannier电子的湮灭算符进行展开。
+	
+	在向量表示下，转移矩阵$A$可以根据$C_m$的向量表示直接求得。
+	\begin{equation}
+		A\begin{pmatrix}
+		\vb{C}_1& \vb{C}_2&\cdots &\vb{C}_N
+	\end{pmatrix}
+	=\begin{pmatrix}
+		\vb{c}_1& \vb{c}_2&\cdots &\vb{c}_N
+	\end{pmatrix}\equiv I\quad \Leftrightarrow\quad  A=
+	\begin{pmatrix}
+	\vb{C}_1& \vb{C}_2&\cdots &\vb{C}_N
+	\end{pmatrix}^{-1}=\sim ^T
+	\end{equation}
+	通过此技术，可以得到最终的Downfolding Wannier函数电子对应的湮灭算符$C_j=\sum_i A_{ij}c_i$。
+	\subsection{$\vb*{k}$空间}
+	假设系统相互作用不很强，可以单电子近似（Sing.Elec.Appr.）下的能带还近似成立，即
+	\begin{equation}\label{HSEA}
+		H_{S.E.A.}=\sum_{n,\vb{k}}E_n(\vb{k})c_{n\vb{k}}^\dagger c_{n\vb{k}}
+	\end{equation}
+	$c_{n\vb{k}}$为Bloch电子的湮灭算符。
+	\begin{equation}\label{bloch-oribital}
+		c_{n\vb{k}} = \sum_{i,\alpha} \mathrm{e}^{i\vb{k}\cdot \vb{R}_i}A_{n,\alpha}(\vb{k})c_{i,\alpha}
+	\end{equation}
+	$c_{i}$为位置的$\vb{R}_i$中第$\alpha$个轨道的Wannier电子的湮灭算符。
+	
+	在选定能带以后，根据$c_{n\vb{k}}$在基$\left\{c_i\right\}$上的向量表示$\vb{c}_{n\vb{k}}$，利用文献\cite{PhysRevB.108.L161111}中提供的技术，可以得到系统Downfolding后的Wannier函数$C_j$，满足
+	\begin{equation}
+		c_i=\sum_{j}^{N_c}A_{ij}C_j + \text{other bands}
+	\end{equation}
+	其中因为我们downfolding过程中只考虑前$N_c$列对应的忽略了其它能带的贡献，将上式代入系统的哈密顿量
+	\begin{equation}\label{Hamiltonian}
+		H = \sum_n\sum_{
+			\substack{\langle i,j \rangle_n\\ 
+				\alpha,\beta,\sigma}
+			}t_nc_{i\alpha\sigma}^\dagger c_{j\beta\sigma}+\sum_n\sum_{
+						\substack{\langle i,j \rangle_n\\ 
+				\alpha,\beta,\sigma,\sigma'}
+				}V_n n_{i\alpha\sigma}^\dagger n_{j\beta\sigma'}
+	\end{equation}
+	从而可以得到Downfolding后的哈密顿量。
+	%双带downfolding通过取$n=c,v$然后将\ref{bloch-oribital}代入\ref{Hamiltonian}中，得到有效Lattice下的有效哈密顿量。
+	\subsection{Differences}
+	两种Downfolding的差别仅在于系统主导本征态的确定方法不同：
+	\begin{enumerate}
+		\item $A_{n,\alpha}(\vb{k})$：从第一性原理的角度出发计算\textbf{单电子近似成立}的前提下的主导本征态。认为系统单电子近似依然近似成立（即能带依然存在）的条件下。等价于认为系统的基态就存在于这些本征态之间。
+		\item $M_{\vb{k}\vb{k}'}$：计算出系统的基态以后\textbf{面向基态}计算主导本征态。在多体系统中的正规做法（如果蒋晟韬的方法正确）下严格成立。
+	\end{enumerate}
+	\addcontentsline{toc}{section}{参考文献}
+	\bibliography{RGrefer}
+\end{document}
+
+

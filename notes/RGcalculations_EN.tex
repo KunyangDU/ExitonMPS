@@ -1,0 +1,70 @@
+\documentclass{article}
+%\usepackage{ctex}
+\usepackage{physics}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{indentfirst}
+\usepackage{amsmath}
+\usepackage{pifont}
+\usepackage{caption}
+\usepackage{float}  %设置图片浮动位置的宏包
+\usepackage{subfigure}  %插入多图时用子图显示的宏包
+\usepackage{verbatim}
+\usepackage{cite}
+\usepackage{abstract}
+\usepackage{amssymb}
+\usepackage{enumitem}
+%\usepackage[numbers]{gbt7714}
+\usepackage{authblk}
+\usepackage[backref]{hyperref}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,
+	filecolor=blue,      
+	urlcolor=blue,
+	citecolor=blue,
+	pdftitle={Overleaf Example},
+}
+\makeatletter
+\renewcommand{\@maketitle}{
+	\newpage
+	%\null
+	\vskip 0em%
+	\begin{center}%
+		{\LARGE \@title \par}%
+		\vskip 1em
+		{\large \@author \par}%
+		%\vskip 1em
+		{\large \@date \par}
+	\end{center}%
+} \makeatother
+\renewcommand*{\Authsep}{，}
+\renewcommand*{\Authand}{，}
+%\renewcommand*{\Authands}{，}
+
+\urlstyle{same}
+\bibliographystyle{plain}
+\setlength{\parindent}{2em}
+\geometry{a4paper,left=3cm,right=2.5cm,top=2.8cm,bottom=2.5cm}
+
+\title{Numerical Renormalization Group Calculations of Exiton}
+\author{Khunyang DU}
+\date{\today}
+
+\begin{document}
+	\maketitle
+	\tableofcontents
+	\section{INTRODUCTION}
+	\subsection{Concepts of Exciton}
+	\subsection{Techniques in Superconductivity}
+	\section{OBSERVABLES}
+	\subsection{Ordinary}
+	\subsection{Exciton Pairing Operator}
+	\section{DOWNFOLDING}
+	\subsection{Real Space}
+	\subsection{$\vb*{k}$ Space}
+	\addcontentsline{toc}{section}{References}
+	\bibliography{RGrefer}
+\end{document}
+
+
